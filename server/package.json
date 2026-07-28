@@ -1,0 +1,16 @@
+{
+  "name": "laam-analytics-api",
+  "version": "1.0.0",
+  "description": "Backend API for LAAM Buyer-Behaviour Analytics Dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}

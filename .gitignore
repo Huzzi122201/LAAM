@@ -1,0 +1,5 @@
+node_modules/
+*.log
+dataset.sqlite-shm
+dataset.sqlite-wal
+.DS_Store
