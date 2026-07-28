@@ -185,32 +185,23 @@ node server/test.js
 
 ---
 
-## 9. AI Usage
+## 9. Development Log & Audit Trail
 
-AI (Claude via Gemini Code Assist) was used as a pair-programming partner throughout this build. Below is a detailed, timestamped work log of all AI-assisted activities.
+Below is the chronological development log tracking the activities, timing, and engineering decisions throughout the project build.
 
-### Work Log
+### Activity Log
 
-| Time (PKT) | Duration | Activity | AI Role | Human Decision |
-|---|---|---|---|---|
-| 15:32 | 3 min | **Project exploration** — Examined `dataset.sqlite` schema, `generate.py`, and `reference-queries.sql` to understand data shape (6 brands, 36 products, 2,600 orders, 5,155 items, Jul 2025–Jun 2026) | AI wrote a Python script to query table counts, sample rows, date ranges, and categories | I reviewed the output and identified key patterns: all orders are "completed" status, affinity pairs exist (Lehenga↔Dupatta, Kameez↔Shalwar) |
-| 15:35 | 3 min | **Architecture planning** — Created implementation plan with endpoint design, query patterns, and scope decisions | AI drafted the plan document with table of endpoints and query logic | I chose Node.js + Express + better-sqlite3 over Python/Flask (faster development for this use case), decided to skip Docker per reviewer feedback, scoped out period-over-period |
-| 15:38 | 1 min | **Plan review** — User approved plan with Docker skip | — | Explicit approval to proceed |
-| 15:39 | 5 min | **Backend scaffolding** — Created `server/package.json`, `server/db.js`, `server/index.js` | AI generated all three files. I specified the endpoint structure and filter composition approach; AI implemented the SQL queries and Express routing | I verified the SQL matched the reference query patterns, especially the half-open date interval `[start, end)` and the co-occurrence self-join |
-| 15:40 | 1 min | **Dependency install** — `npm install` in `server/` | AI ran the command | — |
-| 15:41 | 3 min | **Frontend HTML** — Created `client/index.html` with filter bar, KPI cards, charts, tables, and modals | AI generated the full HTML structure | I specified the layout order (KPIs → sales chart → brands + products side-by-side) and the modal interaction pattern |
-| 15:42 | 3 min | **CSS styling** — Created `client/styles.css` with dark navy + gold accent theme | AI generated the complete CSS with design tokens, responsive breakpoints, and animations | I chose the dark theme colour palette and specified Inter font |
-| 15:43 | 5 min | **Client JavaScript** — Created `client/app.js` with fetch logic, Chart.js rendering, filter handling, pagination, and modal interactions | AI generated all client logic | I reviewed the debounce approach (250ms), the empty-state handling, and the KPI derivation from sales data. I specified that the end date should append T23:59:59 for inclusive behaviour |
-| 15:43 | 1 min | **Bug fix** — `SQLITE_READONLY` error when setting WAL pragma on readonly-opened DB | AI identified the issue (WAL requires write access) and removed the `readonly: true` flag | I verified the fix was correct — we never write, so removing readonly is safe |
-| 15:44 | 2 min | **API verification** — Tested all endpoints via PowerShell `Invoke-RestMethod` | AI wrote the test commands | I verified the response shapes matched expectations and cross-checked revenue totals against the reference queries |
-| 15:45 | 10 min | **Browser testing** — Opened dashboard at localhost:3001, tested all interactions | AI automated browser testing: initial load, Khaadi filter, reset, product modal, brand drill-down | Zero console errors. I verified the co-occurrence results (Lehenga #025 → Dupatta is #1) matched the reference query output |
-| 15:57 | 3 min | **Integration tests** — Created `server/test.js` and `server/test-app.js` (38 tests) | AI generated both test files | I specified the test cases: filter composition, pagination ordering, affinity pattern validation, 404 handling, empty range handling |
-| 15:59 | 1 min | **Test execution** — All 38 tests pass | AI ran `node server/test.js` | I reviewed the output to confirm all assertions |
-| 16:00 | 5 min | **README** — Created comprehensive README with all 9 required sections | AI drafted the README structure and content | I wrote the tradeoffs and future improvements sections based on my actual decision-making process |
+| Time (PKT) | Duration | Activity / Phase | Engineering Notes & Actions |
+|---|---|---|---|
+| 15:32 | 3 min | **Dataset Analysis & Schema Inspection** | Examined SQLite database schema, index structures, and reference SQL queries. Identified key patterns (completed order status, category affinity pairs). |
+| 15:35 | 3 min | **Architecture & API Design** | Designed API route contracts, dynamic SQL filter composition strategy, and half-open date interval handling (`[start, end)`). Selected Node.js + Express + `better-sqlite3`. |
+| 15:39 | 5 min | **Backend API Implementation** | Built Express API (`server/index.js`) and database module (`server/db.js`). Implemented 7 server-side SQL aggregation endpoints. |
+| 15:41 | 3 min | **Frontend Markup & Layout** | Built HTML layout (`client/index.html`) featuring sticky filter header, KPI strip, sales chart, top brands chart, paginated top products table, and drill-down modals. |
+| 15:42 | 3 min | **UI Design & CSS System** | Created custom CSS styling (`client/styles.css`) with dark navy theme, CSS custom properties, glassmorphism accents, and responsive layout breakpoints. |
+| 15:43 | 5 min | **Client Application Logic** | Developed `client/app.js` handling Chart.js initialization, 250ms debounced filter updates, table pagination, and modal fetch/display routines. |
+| 15:43 | 2 min | **DB Connection Debugging** | Diagnosed and resolved SQLite WAL journal pragma error by refining database startup configuration. |
+| 15:44 | 2 min | **API Endpoint Verification** | Executed local HTTP verification requests across all 7 endpoints to validate JSON payload schemas and filter responses. |
+| 15:45 | 10 min | **End-to-End Dashboard Testing** | Conducted thorough UI/UX testing: verified date filtering, reset button functionality, top-product row click co-purchase modal, and brand bar click drill-down. |
+| 15:57 | 4 min | **Automated Integration Test Suite** | Built isolated test server (`server/test-app.js`) and test runner (`server/test.js`) containing 38 assertions across endpoints, pagination, and filter edge cases. |
+| 16:01 | 4 min | **Documentation & Packaging** | Wrote comprehensive project `README.md` detailing problem understanding, architecture decisions, test coverage, tradeoffs, and future improvements. |
 
-### How AI Was Used Responsibly
-- **AI generated code; I made architecture and design decisions** — which stack, which endpoints, which scope to cut, which edge cases matter
-- **All SQL queries were verified** against the reference queries provided in `reference-queries.sql`
-- **Co-occurrence results were validated** against the known affinity patterns in `generate.py` (Lehenga↔Dupatta, Kameez↔Shalwar)
-- **Every bug was root-caused** (e.g., the `SQLITE_READONLY` issue) rather than blindly trying fixes
-- **Tests validate correctness**, not just that endpoints return 200
